@@ -39,9 +39,9 @@ if SPREADSHEET_ID == None:
     f.close()
 
 PLAYERS_RANGE = 'Players!A2:AQ'
-MVP_RANGE = 'MVP!A2:C'
+MVP_RANGE = 'MVP!A2:D'
 SEASON_RANGE = 'Season!A2'
-PRIZES_RANGE = 'Season!A3'
+# PRIZES_RANGE = 'Season!A3'
 
 STATS_LINK = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID
 STATS_VIEW = 'https://datastudio.google.com/s/uVn7MVX-rc8'
@@ -161,17 +161,17 @@ class SpreadSheet:
             return values
         return None
 
-    def fetchPrizeData(self):
-        result = self.sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                    range=PRIZES_RANGE).execute()
-        values = result.get('values', [])
+    # def fetchPrizeData(self):
+    #     result = self.sheet.values().get(spreadsheetId=SPREADSHEET_ID,
+    #                                 range=PRIZES_RANGE).execute()
+    #     values = result.get('values', [])
 
-        # pprint(values)
-        if not values:
-            if(DEBUG): print('No data found.')
-        else:
-            return values[0][0]
-        return None
+    #     # pprint(values)
+    #     if not values:
+    #         if(DEBUG): print('No data found.')
+    #     else:
+    #         return values[0][0]
+    #     return None
 
     def fetchSeasonData(self):
         #get's data from google sheets
@@ -219,7 +219,7 @@ class MyClient(discord.Client):
     async def mvp(self, message):
         data = self.sheet.fetchMVPData()
 
-        header = "```{0:<5} {1:<32} {2:<6}```\n```".format("RANK","NAME","# MVP")
+        header = "```{0:<5} {1:<22} {2:<7} {3:<6}```\n```".format("RANK", "NAME", "ROLE","# MVP")
         
         entriesPerPage = 10
         numPages = math.ceil(len(data) / entriesPerPage)
@@ -230,13 +230,13 @@ class MyClient(discord.Client):
             end = start + entriesPerPage
 
             # pprint(data);
-            entries = ["{0:<5} {1:<32} {2:<6}".format(str(row[0]) + ".", row[1], str(row[2])) if len(row) == 3 else "*****INVALID_DATA*****" for row in data[start:end]]
+            entries = ["{0:<5} {1:<22} {2:<7} {3:<6}".format(str(row[0]) + ".", row[1], row[2], str(row[3])) if len(row) == 4 else "*****INVALID_DATA*****" for row in data[start:end]]
             content = header
             content += "\n".join(entries)
             content += "```"
 
             embed = discord.Embed(
-                title="LeaderBoards",
+                title="MVP LeaderBoards",
                 type="rich",
                 description=content,
                 colour=0xFFFF)
@@ -433,10 +433,10 @@ class MyClient(discord.Client):
         elif command == 'stats':
             name = " ".join(components[1:])
             await self.stats(message, name)
-        elif command == 'synergy':
-            await self.synergy(message)
-        elif command == 'prizes':
-            await self.prizes(message)
+        # elif command == 'synergy':
+        #     await self.synergy(message)
+        # elif command == 'prizes':
+        #     await self.prizes(message)
         elif command == 'season':
             await self.season(message)
         elif command == 'statsview' or command == 'stats_view':
