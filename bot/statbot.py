@@ -44,7 +44,7 @@ SEASON_RANGE = 'Season!A2'
 PRIZES_RANGE = 'Season!A3'
 
 STATS_LINK = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID
-STATS_VIEW = 'https://datastudio.google.com/reporting/4e25d626-273c-4b9c-95df-c683bd5e69e8'
+STATS_VIEW = 'https://datastudio.google.com/s/uVn7MVX-rc8'
 
 STAT_BOT_TOKEN = os.getenv('STAT_BOT_TOKEN')
 if STAT_BOT_TOKEN == None:
