@@ -39,7 +39,7 @@ if SPREADSHEET_ID == None:
     f.close()
 
 PLAYERS_RANGE = 'Players!A2:AQ'
-LADDER_RANGE = 'Ladder!A2:C'
+MVP_RANGE = 'MVP!A2:C'
 SEASON_RANGE = 'Season!A2'
 PRIZES_RANGE = 'Season!A3'
 
@@ -101,7 +101,7 @@ class PlayerData:
         self.baron_avg = data[39] if 39 < len(data) else "N/A"
         self.dragon_avg = data[40] if 40 < len(data) else "N/A"
         self.fantasy_score = data[41] if 41 < len(data) else "N/A"
-        self.elo = data[42] if 42 < len(data) else "N/A"
+        self.mvp = data[42] if 42 < len(data) else "N/A"
 
 class SpreadSheet:
 
@@ -149,9 +149,9 @@ class SpreadSheet:
                     return PlayerData(row)
         return None
 
-    def fetchLadderData(self):
+    def fetchMVPData(self):
         result = self.sheet.values().get(spreadsheetId=SPREADSHEET_ID,
-                                    range=LADDER_RANGE).execute()
+                                    range=MVP_RANGE).execute()
         values = result.get('values', [])
 
         # pprint(values)
@@ -216,10 +216,10 @@ class MyClient(discord.Client):
     async def on_error(event_name, *args, **kwargs):
         logging.warning(traceback.format_exc()) #logs the error
 
-    async def ladder(self, message):
-        data = self.sheet.fetchLadderData()
+    async def mvp(self, message):
+        data = self.sheet.fetchMVPData()
 
-        header = "```{0:<5} {1:<32} {2:<6}```\n```".format("RANK","NAME","ELO")
+        header = "```{0:<5} {1:<32} {2:<6}```\n```".format("RANK","NAME","# MVP")
         
         entriesPerPage = 10
         numPages = math.ceil(len(data) / entriesPerPage)
@@ -243,15 +243,15 @@ class MyClient(discord.Client):
             embed.set_footer(text="page %d/%d" %(index + 1, numPages))
             return embed
 
-        ladderMsg = await message.reply(embed=update(0))
-        await ladderMsg.add_reaction('📌')
-        await ladderMsg.add_reaction('⏮')
-        await ladderMsg.add_reaction('◀')
-        await ladderMsg.add_reaction('▶')
-        await ladderMsg.add_reaction('⏭')
-        await ladderMsg.add_reaction('🗑️')
+        mvpMsg = await message.reply(embed=update(0))
+        await mvpMsg.add_reaction('📌')
+        await mvpMsg.add_reaction('⏮')
+        await mvpMsg.add_reaction('◀')
+        await mvpMsg.add_reaction('▶')
+        await mvpMsg.add_reaction('⏭')
+        await mvpMsg.add_reaction('🗑️')
         def check(reaction, user):
-            return user == message.author and reaction.message == ladderMsg
+            return user == message.author and reaction.message == mvpMsg
 
         i = 0
         reaction = None
@@ -262,30 +262,30 @@ class MyClient(discord.Client):
                 break;
             elif str(reaction) == '⏮':
                 i = 0
-                await ladderMsg.edit(embed = update(i))
+                await mvpMsg.edit(embed = update(i))
             elif str(reaction) == '◀':
                 if i > 0:
                     i -= 1
-                    await ladderMsg.edit(embed = update(i))
+                    await mvpMsg.edit(embed = update(i))
             elif str(reaction) == '▶':
                 if i < maxIndex:
                     i += 1
-                    await ladderMsg.edit(embed = update(i))
+                    await mvpMsg.edit(embed = update(i))
             elif str(reaction) == '⏭':
                 i = maxIndex
-                await ladderMsg.edit(embed = update(i))
+                await mvpMsg.edit(embed = update(i))
             elif str(reaction) == '🗑️':
                 break
             try:
                 reaction, user = await self.wait_for('reaction_add', timeout = 60.0, check = check)
-                await ladderMsg.remove_reaction(reaction, user)
+                await mvpMsg.remove_reaction(reaction, user)
             except:
                 break
 
         if delete:
-            await ladderMsg.delete()
+            await mvpMsg.delete()
         else:
-            await ladderMsg.clear_reactions()
+            await mvpMsg.clear_reactions()
 
     async def stats(self, message, name):
         if name == "":
@@ -308,7 +308,7 @@ class MyClient(discord.Client):
         page1.add_field(name="Games", value=data.losses_tot, inline=True)
         page1.add_field(name="Wins", value=data.wins_tot, inline=True)
         page1.add_field(name="Win %", value=data.win_rate, inline=True)
-        page1.add_field(name="ELO", value=data.elo, inline=True)
+        page1.add_field(name="MVP", value=data.mvp, inline=True)
         page1.add_field(name="KDA", value=data.kda_tot, inline=True)
         page1.add_field(name="AVG KDA", value=data.kda_avg, inline=True)
         page1.add_field(name="Kills", value=data.kills_tot, inline=True)
@@ -428,8 +428,8 @@ class MyClient(discord.Client):
         
         command = components[0].lower()
 
-        if command == 'ladder':
-            await self.ladder(message)
+        if command == 'mvp':
+            await self.mvp(message)
         elif command == 'stats':
             name = " ".join(components[1:])
             await self.stats(message, name)
@@ -448,16 +448,16 @@ class MyClient(discord.Client):
         else:
             await message.reply("For a list of commands, please use: '%s help'" % self.user.mention, mention_author=True)
         
-    async def prizes(self, message):
-        data = self.sheet.fetchPrizeData()
+    # async def prizes(self, message):
+    #     data = self.sheet.fetchPrizeData()
 
-        embed = discord.Embed (
-            title = 'Prizes',
-            description = data,
-            colour = discord.Colour.red()
-        )
+    #     embed = discord.Embed (
+    #         title = 'Prizes',
+    #         description = data,
+    #         colour = discord.Colour.red()
+    #     )
 
-        await message.reply(embed=embed, mention_author=True)
+    #     await message.reply(embed=embed, mention_author=True)
 
 
     async def season(self, message):
@@ -475,7 +475,7 @@ class MyClient(discord.Client):
     async def help(self, message):
 
         # description ="""
-        # *ladder* - displays the current ladder based on Fantasy Score
+        # *mvp* - displays the current mvp based on Fantasy Score
         # *stats <league_name>* - displays the stats of the specified user (You can copy paste by using @Orianna Bot profile)
         # *synergy* - under construction
         # *statsview* - view stats report on the web
@@ -488,13 +488,13 @@ class MyClient(discord.Client):
             colour = discord.Colour.red()
         )
 
-        embed.add_field(name="ladder", value="displays the current ladder based on your local ELO", inline=False)
+        embed.add_field(name="mvp", value="displays the current ranking in # MVPs", inline=False)
         embed.add_field(name="stats <league_name>", value="displays the stats of the specified user\n*Note: You can copy paste from `@Orianna Bot profile`*", inline=False)
         # embed.add_field(name="synergy", value="Under Construction", inline=False)
         embed.add_field(name="statsview", value="view stats report on the web", inline=False)
         embed.add_field(name="statslink", value="view stats spreadsheet", inline=False)
         embed.add_field(name="season", value="view current season", inline=False)
-        embed.add_field(name="prizes", value="view prize list for current season", inline=False)
+        # embed.add_field(name="prizes", value="view prize list for current season", inline=False)
 
         await message.reply(embed=embed, mention_author=True)
 

@@ -1,4 +1,4 @@
-# SchneckyIRL
+# CCA Academy League Bot
 
 
 
