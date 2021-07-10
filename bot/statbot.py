@@ -200,12 +200,9 @@ class MyClient(discord.Client):
     async def on_message(self, message):
         print('Message from {0.author}: {0.content}'.format(message))
         logging.info('Got message "%s"', message)
-        
+
         if message.author == self.user:
             return
-
-        if message.content.startswith('$hello'):
-            await message.channel.send('Hello!')
 
         if client.user.mentioned_in(message):
             components = message.content.split()
@@ -222,7 +219,7 @@ class MyClient(discord.Client):
         data = self.sheet.fetchMVPData()
 
         header = "```{0:<5} {1:<22} {2:<7} {3:<6}```\n```".format("RANK", "NAME", "ROLE","# MVP")
-        
+
         entriesPerPage = 10
         numPages = math.ceil(len(data) / entriesPerPage)
         maxIndex = numPages - 1
@@ -361,7 +358,7 @@ class MyClient(discord.Client):
         page3.add_field(name="AVG Rift Heralds", value=data.rift_avg, inline=True)
         page3.add_field(name="AVG Barons", value=data.baron_avg, inline=True)
         page3.add_field(name="AVG Dragons", value=data.dragon_avg, inline=True)
-        
+
         page3.set_footer(text="page 3/3")
         pages = [page1, page2, page3]
 
@@ -416,7 +413,7 @@ class MyClient(discord.Client):
             await statsMsg.delete()
         else:
             await statsMsg.clear_reactions()
-            
+
 
     async def synergy(self, message, components):
         await message.reply('synergy', mention_author=True)
@@ -427,7 +424,7 @@ class MyClient(discord.Client):
         if components == []:
             await self.help(message)
             return
-        
+
         command = components[0].lower()
 
         if command == 'mvp':
@@ -449,7 +446,7 @@ class MyClient(discord.Client):
             await self.help(message)
         else:
             await message.reply("For a list of commands, please use: '%s help'" % self.user.mention, mention_author=True)
-        
+
     # async def prizes(self, message):
     #     data = self.sheet.fetchPrizeData()
 
@@ -502,7 +499,7 @@ class MyClient(discord.Client):
 
 
 
-    
+
 
 client = MyClient()
 client.run(STAT_BOT_TOKEN)
