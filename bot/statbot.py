@@ -209,8 +209,6 @@ class MyClient(discord.Client):
 
             if str(self.user.id) in components[0]:
                 await self.handleCommand(message, components[1:])
-            else :
-                await message.reply('Hello!', mention_author=True)
 
     async def on_error(event_name, *args, **kwargs):
         logging.warning(traceback.format_exc()) #logs the error
